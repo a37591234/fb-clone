@@ -1,16 +1,17 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import express from "express";
-import dotenv from "dotenv";
 import helmet from "helmet";
 import db from "./db/config.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import morgan from "morgan";
-import authRoute from "./routes/auth.js";
-
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/users.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config();
+
 const app = express();
 
 app.use(express.json({ limit: "30mb" }));
@@ -20,11 +21,14 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(cors());
 app.use(express.static(__dirname + "/public"));
-app.use(authRoute);
+
+//ROUTES
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 
 const PORT = process.env.PORT || 6001;
 
-const test = async () => {
+const start = async () => {
   try {
     await db.authenticate();
     await app.listen(PORT);
@@ -34,4 +38,4 @@ const test = async () => {
   }
 };
 
-test();
+start();
