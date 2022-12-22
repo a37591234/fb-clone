@@ -6,6 +6,6 @@ import { verifyToken } from "../middleware/auth.js";
 const router = express.Router();
 
 router.post("/register", upload.single("picture"), register);
-router.post("/login", verifyToken, login);
+router.post("/login", login);
 
 export default router;
