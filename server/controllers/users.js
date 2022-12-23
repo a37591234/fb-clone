@@ -15,12 +15,11 @@ export const getUser = async (req, res) => {
 export const getUserFriends = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await Relationship.findAll({ where: { followerUserId: id } });
-    const friends = await Promise.all(user.followedUserId.map((id) => User.findByPk(id)));
-    const formattedFriends = friends.map(({ id, name, picture }) => {
-      id, name, picture;
-    });
-    res.status(200).json(formattedFriends);
+    const user = await Relationship.findAll({ attributes: ["followedUserId"], where: { followerUserId: id }, raw: true });
+    const formattedFollowedUserId = await Promise.all(user.map((x) => x.followedUserId));
+    const friends = await Promise.all(formattedFollowedUserId.map((id) => User.findByPk(id, { attributes: ["id", "name", "picture"], raw: true })));
+
+    res.status(200).json(friends);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -29,6 +28,15 @@ export const getUserFriends = async (req, res) => {
 /* UPDATE */
 export const addRemoveFriend = async (req, res) => {
   try {
+    const { id, friendId } = req.params;
+    const user = await Relationship.findAll({ where: { followerUserId: id }, raw: true, attributes: ["followedUserId"] });
+    const formattedFollowedUserId = await Promise.all(user.map((x) => x.followedUserId));
+    if (formattedFollowedUserId.includes(+friendId)) {
+      await Relationship.destroy({ where: { followerUserId: +id } });
+    } else {
+      await Relationship.create({ followerUserId: +id, followedUserId: +friendId });
+    }
+    res.status(200).json(`Friendlist updated`);
   } catch (err) {
     res.status(500).json(err);
   }

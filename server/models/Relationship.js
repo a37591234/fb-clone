@@ -4,7 +4,7 @@ import db from "../db/config.js";
 const Relationship = db.define(
   "Relationship",
   {
-    followUserId: {
+    followerUserId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
