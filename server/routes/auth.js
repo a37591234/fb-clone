@@ -1,7 +1,6 @@
 import express from "express";
 import upload from "../middleware/upload.js";
 import { register, login } from "../controllers/auth.js";
-import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
