@@ -4,11 +4,18 @@ import db from "../db/config.js";
 const Post = db.define(
   "Post",
   {
-    desc: {
+    postId: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+      unique: true,
+    },
+    description: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-    img: {
+    picturePath: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },

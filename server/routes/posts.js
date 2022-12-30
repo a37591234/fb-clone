@@ -6,13 +6,13 @@ import upload from "../middleware/upload.js";
 const router = express.Router();
 
 /* READ */
-router.get("/", getFeedPosts);
-router.get("/:userId/posts", getUserPosts);
+router.get("/", verifyToken, getFeedPosts);
+router.get("/:userId/posts", verifyToken, getUserPosts);
 
 /* UPDATE */
-router.patch("/:id/like", likePost);
+router.patch("/:postId/like", verifyToken, likePost);
 
 /* CREATE */
-router.post("/", createPost);
+router.post("/", verifyToken, createPost);
 
 export default router;

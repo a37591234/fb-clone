@@ -4,43 +4,44 @@ import Relationship from "../models/Relationship.js";
 /* READ */
 export const getUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await User.findOne({ where: { id: id } });
+    const { userId } = req.params;
+    const user = await User.findOne({ where: { userId: userId }, raw: true });
 
     res.status(200).json(user);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
 export const getUserFriends = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await Relationship.findAll({ attributes: ["followedUserId"], where: { followerUserId: id }, raw: true });
+    const { userId } = req.params;
+    const user = await Relationship.findAll({ attributes: ["followedUserId"], where: { followerUserId: userId }, raw: true });
     const formattedFollowedUserId = await Promise.all(user.map((x) => x.followedUserId));
-    const friends = await Promise.all(formattedFollowedUserId.map((id) => User.findByPk(id, { attributes: ["id", "name", "picture"], raw: true })));
+    const friends = await Promise.all(formattedFollowedUserId.map((userId) => User.findByPk(userId, { attributes: ["userId", "name", "picturePath"], raw: true })));
 
-    res.status(200).json(friends);
+    res.status(200).json({ friends: friends });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
 /* UPDATE */
 export const addRemoveFriend = async (req, res) => {
   try {
-    const { id, friendId } = req.params;
-    const user = await Relationship.findAll({ where: { followerUserId: id }, raw: true, attributes: ["followedUserId"] });
+    const { userId, friendId } = req.params;
+
+    const user = await Relationship.findAll({ where: { followerUserId: +userId }, raw: true, attributes: ["followedUserId"] });
     const formattedFollowedUserId = await Promise.all(user.map((x) => x.followedUserId));
 
     if (formattedFollowedUserId.includes(+friendId)) {
-      await Relationship.destroy({ where: { followerUserId: +id, followedUserId: +friendId } });
+      await Relationship.destroy({ where: { followerUserId: +userId, followedUserId: +friendId } });
     } else {
-      await Relationship.create({ followerUserId: +id, followedUserId: +friendId });
+      await Relationship.create({ followerUserId: +userId, followedUserId: +friendId });
     }
 
-    res.status(200).json(`Friendlist updated`);
+    res.status(200).json({ message: `Friendlist updated` });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ error: err.message });
   }
 };

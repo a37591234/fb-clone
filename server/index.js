@@ -33,7 +33,7 @@ const PORT = process.env.PORT || 6001;
 const start = async () => {
   try {
     await db.authenticate();
-    await app.listen(PORT);
+    app.listen(PORT);
     console.log(`Server PORT: ${PORT} is listening`);
   } catch (err) {
     console.log(err);

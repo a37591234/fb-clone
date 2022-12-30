@@ -5,10 +5,10 @@ import { verifyToken } from "../middleware/verifyToken.js";
 const router = express.Router();
 
 /* READ */
-router.get("/:id", getUser);
-router.get("/:id/friends", getUserFriends);
+router.get("/:userId", verifyToken, getUser);
+router.get("/:userId/friends", verifyToken, getUserFriends);
 
 /* UPDATE */
-router.patch("/:id/:friendId", addRemoveFriend);
+router.patch("/:userId/:friendId", verifyToken, addRemoveFriend);
 
 export default router;

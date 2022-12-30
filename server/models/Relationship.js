@@ -4,6 +4,13 @@ import db from "../db/config.js";
 const Relationship = db.define(
   "Relationship",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+      unique: true,
+    },
     followerUserId: {
       type: DataTypes.INTEGER,
       allowNull: false,

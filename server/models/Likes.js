@@ -4,6 +4,13 @@ import db from "../db/config.js";
 const Like = db.define(
   "Like",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+      unique: true,
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
