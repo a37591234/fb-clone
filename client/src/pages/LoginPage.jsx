@@ -2,28 +2,43 @@ import * as React from "react";
 import { CssVarsProvider } from "@mui/joy/styles";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
-import TextField from "@mui/joy/TextField";
-import Button from "@mui/joy/Button";
 import Link from "@mui/joy/Link";
-import { useFormik } from "formik";
+import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-
-const LoginSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
-});
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { setLogin } from "../store/authSlice.js";
+import { useLoginMutation } from "../store/api/authApi.js";
+import { useEffect } from "react";
 
 export const LoginPage = () => {
-  const formik = useFormik({
-    initialValues: {
-      email: "",
-      password: "",
-    },
-    validationSchema: LoginSchema,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
-    },
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [login, { data: loginData, isSuccess: isLoginSuccess, error: loginError }] = useLoginMutation();
+
+  const LoginSchema = Yup.object().shape({
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    password: Yup.string().min(6, "Password is too short").max(16, "Password is too long").required("Password is required"),
   });
+
+  const initialValues = {
+    email: "",
+    password: "",
+  };
+
+  const handleLogin = async (formValue) => {
+    let { email, password } = formValue;
+    await login({ email, password });
+  };
+
+  useEffect(() => {
+    if (isLoginSuccess) {
+      dispatch(setLogin({ token: loginData.token, user: loginData.user.name }));
+      navigate("/");
+    }
+  });
+
   return (
     <CssVarsProvider>
       <main>
@@ -48,31 +63,26 @@ export const LoginPage = () => {
             </Typography>
             <Typography level="body2">Log in to continue.</Typography>
           </div>
-          <form onSubmit={formik.handleSubmit}>
-            <TextField
-              required
-              name="email"
-              type="email"
-              label="Email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              helperText={formik.touched.email && formik.errors.email}
-              error={formik.touched.email && Boolean(formik.errors.email)}
-            />
-            <TextField
-              required
-              name="password"
-              type="password"
-              label="Password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              helperText={formik.touched.password && formik.errors.password}
-              error={formik.touched.password && Boolean(formik.errors.password)}
-            />
-            <Button type="submit" sx={{ mt: 1 }}>
-              Log in
-            </Button>
-          </form>
+          <div>
+            <Formik initialValues={initialValues} validationSchema={LoginSchema} onSubmit={handleLogin}>
+              <Form>
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <Field name="email" type="text" className="form-control" />
+                  <ErrorMessage name="email" component="div" className="alert alert-danger" />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="password">Password</label>
+                  <Field name="password" type="password" className="form-control" />
+                  <ErrorMessage name="password" component="div" className="alert alert-danger" />
+                </div>
+                <p style={{ color: "red" }}>{loginError && loginError.data.message}</p>
+                <button type="submit" className="btn btn-primary btn-block">
+                  Log in
+                </button>
+              </Form>
+            </Formik>
+          </div>
           <Typography endDecorator={<Link href="/register">Register</Link>} fontSize="sm" sx={{ alignSelf: "center" }}>
             Don&apos;t have an account?
           </Typography>
